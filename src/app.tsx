@@ -2,6 +2,7 @@ import { Database, Sqlite3Static, SqlValue } from "src/sqlite3.mjs";
 import { Editor } from "./editor";
 import { useEffect, useMemo, useReducer, useRef, useState } from "preact/hooks";
 import prettyMilliseconds from "pretty-ms";
+import "./styles.css";
 
 interface ExecutionResult {
   rows: [SqlValue, number][][];
