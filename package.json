@@ -1,6 +1,6 @@
 {
   "name": "@alex.garcia/sqlite-wasm-toolkit",
-  "version": "0.0.1-alpha.3",
+  "version": "0.0.1-alpha.4",
   "author": "Alex Garcia <alexsebastian.garcia@gmail.com>",
   "repository": {
     "type": "git",
