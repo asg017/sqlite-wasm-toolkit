@@ -1,6 +1,15 @@
 {
   "name": "@alex.garcia/sqlite-wasm-toolkit",
   "version": "0.0.1-alpha.1",
+  "author": "Alex Garcia <alexsebastian.garcia@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/asg017/sqlite-wasm-toolkit.git"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "files": [
     "dist"
