@@ -113,18 +113,18 @@ th {
 
 @font-face {
   font-family: "MonaspaceNeon-Regular";
-  src: url("./src/MonaspaceNeon-Regular.woff") format("woff");
+  src: url("../public/MonaspaceNeon-Regular.woff") format("woff");
 }
 @font-face {
   font-family: "MonaspaceXenon-Regular";
-  src: url("./src/MonaspaceXenon-Regular.woff") format("woff");
+  src: url("../public/MonaspaceXenon-Regular.otf") format("otf");
 }
 
 @font-face {
   font-family: "MonaspaceNeon-LightItalic";
-  src: url("./src/MonaspaceNeon-LightItalic.woff") format("woff");
+  src: url("../public/MonaspaceNeon-LightItalic.otf") format("otf");
 }
 @font-face {
   font-family: "MonaspaceNeon-SemiBold";
-  src: url("./src/MonaspaceNeon-SemiBold.woff") format("woff");
+  src: url("../public/MonaspaceNeon-SemiBold.woff") format("woff");
 }
