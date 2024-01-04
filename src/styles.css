@@ -1,0 +1,130 @@
+@import "./inspector.css";
+:root {
+  --swt-code-bg: #f8fafd;
+  --swt-code-comment: #52555b; /*#5f6368;*/
+  --swt-code-keyword: #8430ce;
+  --swt-code-identifier: #1967d2;
+  --swt-code-string: #188038;
+  --swt-code-types: #996900;
+  --swt-code-literal: #b55908;
+  --swt-code-params: #d93025;
+
+  /* Observable Inspector stuff */
+  --syntax_key: var(--swt-code-keyword);
+  --syntax_string: var(--swt-code-string);
+  --syntax_number: var(--swt-code-literal);
+}
+.swt-table {
+  border-collapse: collapse;
+  max-height: 600px;
+  display: block;
+  font-family: MonaspaceXenon-Regular;
+  font-size: 0.8rem;
+}
+
+.swt-table td,
+th {
+  border: 1px solid black;
+}
+
+.swt-table th {
+  background: #dedede;
+  margin: 4px;
+}
+
+.swt-table td {
+  background: white;
+  position: relative;
+  max-width: 8rem;
+
+  & .swt-cell-inner {
+    display: block;
+    width: 100%;
+  }
+  & .swt-cell-inner.active {
+    -webkit-mask-image: linear-gradient(
+      to right,
+      rgba(255, 255, 255, 1),
+      rgba(255, 255, 255, 1) calc(100% - 2rem),
+      rgba(255, 255, 255, 0) calc(100% - 1rem),
+      rgba(255, 255, 255, 0)
+    );
+  }
+
+  & .swt-cell-copy {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    transform: translateY(-100%);
+  }
+  & button {
+    cursor: pointer;
+    background: none;
+    border: none;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+.copy-msg {
+  text-align: center;
+  z-index: 4;
+  animation-duration: 500ms;
+  animation-name: slidein;
+}
+
+@keyframes slidein {
+  from {
+    opacity: 0;
+    top: 0;
+  }
+
+  to {
+    opacity: 1;
+    top: -1.5rem;
+  }
+}
+
+.observablehq--inspect {
+  font-size: 0.8rem !important;
+  font-family: MonaspaceNeon-Regular !important;
+}
+.swt-table thead th {
+  top: 0;
+}
+
+.swt-table .swt-cell-string {
+  white-space: pre-wrap;
+}
+.swt-table .swt-cell-blob,
+.swt-cell-number {
+  display: block;
+  text-align: right;
+}
+
+.swt-editor .cm-editor .cm-content {
+  font-family: "MonaspaceNeon-Regular";
+  font-size: 0.9rem;
+}
+.swt-editor .cm-editor {
+  border: 1px solid black;
+  background: var(--swt-code-bg);
+}
+
+@font-face {
+  font-family: "MonaspaceNeon-Regular";
+  src: url("./src/MonaspaceNeon-Regular.woff") format("woff");
+}
+@font-face {
+  font-family: "MonaspaceXenon-Regular";
+  src: url("./src/MonaspaceXenon-Regular.woff") format("woff");
+}
+
+@font-face {
+  font-family: "MonaspaceNeon-LightItalic";
+  src: url("./src/MonaspaceNeon-LightItalic.woff") format("woff");
+}
+@font-face {
+  font-family: "MonaspaceNeon-SemiBold";
+  src: url("./src/MonaspaceNeon-SemiBold.woff") format("woff");
+}
