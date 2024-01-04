@@ -1,7 +1,7 @@
 import * as esbuild from "esbuild";
 import { copyFileSync } from "node:fs";
 esbuild.buildSync({
-  entryPoints: ["src/index.tsx"],
+  entryPoints: ["src/full.tsx", "src/slim.tsx"],
   bundle: true,
   minify: true,
   format: "esm",
