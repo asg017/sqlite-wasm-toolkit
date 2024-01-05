@@ -205,7 +205,7 @@ export function App(props: { sqlite3: Sqlite3Static; initialCode?: string }) {
   return (
     <>
       <Editor
-        initialCode={initialCode}
+        initialCode={props.initialCode ?? initialCode}
         onCommit={(s) => {
           setLastSubmit(Date.now());
           setCommit(s);
