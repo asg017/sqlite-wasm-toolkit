@@ -1,4 +1,9 @@
-import { Database, Sqlite3Static, SqlValue } from "src/sqlite3.mjs";
+import {
+  Database,
+  PreparedStatement,
+  Sqlite3Static,
+  SqlValue,
+} from "src/sqlite3.mjs";
 import { Editor } from "./editor";
 import { useEffect, useMemo, useReducer, useRef, useState } from "preact/hooks";
 import prettyMilliseconds from "pretty-ms";
@@ -124,6 +129,7 @@ function Results(props: {
   db: Database;
   lastSubmit: number;
   sqlite3: Sqlite3Static;
+  prepareStatement?: (statement: PreparedStatement) => void;
 }) {
   const [state, dispatch] = useReducer<State, Action>(reducer, {
     loading: true,
@@ -134,6 +140,9 @@ function Results(props: {
     const start = performance.now();
     try {
       const stmt = props.db.prepare(props.commit);
+      if (props.prepareStatement) {
+        props.prepareStatement(stmt);
+      }
       const columns = stmt.getColumnNames();
       const rows: [SqlValue, number][][] = [];
       while (stmt.step()) {
@@ -153,7 +162,7 @@ function Results(props: {
         error: { message: (error as Error).toString() },
       });
     }
-  }, [props.commit, props.db, props.lastSubmit]);
+  }, [props.commit, props.db, props.lastSubmit, props.prepareStatement]);
 
   if (state.loading) return <div>Loading...</div>;
   if (state.results) {
@@ -195,7 +204,11 @@ function Results(props: {
 
 const initialCode = `select 1 + 1, 'hello!' as name;`;
 
-export function App(props: { sqlite3: Sqlite3Static; initialCode?: string }) {
+export function App(props: {
+  sqlite3: Sqlite3Static;
+  initialCode?: string;
+  prepareStatement?: (statement: PreparedStatement) => void;
+}) {
   const db = useMemo(() => new props.sqlite3.oo1.DB(":memory"), []);
   const [commit, setCommit] = useState<string | null>(
     props.initialCode ?? initialCode
@@ -217,6 +230,7 @@ export function App(props: { sqlite3: Sqlite3Static; initialCode?: string }) {
           db={db}
           lastSubmit={lastSubmit}
           sqlite3={props.sqlite3}
+          prepareStatement={props.prepareStatement}
         />
       )}
     </>
