@@ -195,9 +195,11 @@ function Results(props: {
 
 const initialCode = `select 1 + 1, 'hello!' as name;`;
 
-export function App(props: { sqlite3: Sqlite3Static }) {
+export function App(props: { sqlite3: Sqlite3Static; initialCode?: string }) {
   const db = useMemo(() => new props.sqlite3.oo1.DB(":memory"), []);
-  const [commit, setCommit] = useState<string | null>(initialCode);
+  const [commit, setCommit] = useState<string | null>(
+    props.initialCode ?? initialCode
+  );
   const [lastSubmit, setLastSubmit] = useState<number>(Date.now());
 
   return (
