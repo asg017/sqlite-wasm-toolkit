@@ -209,7 +209,7 @@ export function App(props: {
   initialCode?: string;
   prepareStatement?: (statement: PreparedStatement) => void;
 }) {
-  const db = useMemo(() => new props.sqlite3.oo1.DB(":memory"), []);
+  const db = useMemo(() => new props.sqlite3.oo1.DB(":memory:"), []);
   const [commit, setCommit] = useState<string | null>(
     props.initialCode ?? initialCode
   );
