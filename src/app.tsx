@@ -15,7 +15,7 @@ interface ExecutionResult {
   elapsed: number;
 }
 interface ExecutionError {
-  message: string;
+  error: Error;
 }
 interface State {
   loading: boolean;
@@ -33,9 +33,19 @@ function reducer(state: State, action: Action): State {
     case "init":
       return { ...state, loading: true };
     case "failure":
-      return { ...state, loading: false, error: action.error };
+      return {
+        ...state,
+        loading: false,
+        error: action.error,
+        results: undefined,
+      };
     case "success":
-      return { ...state, loading: false, results: action.results };
+      return {
+        ...state,
+        loading: false,
+        results: action.results,
+        error: undefined,
+      };
   }
 }
 
@@ -130,6 +140,7 @@ function Results(props: {
   lastSubmit: number;
   sqlite3: Sqlite3Static;
   prepareStatement?: (statement: PreparedStatement) => void;
+  footer: string;
 }) {
   const [state, dispatch] = useReducer<State, Action>(reducer, {
     loading: true,
@@ -159,17 +170,25 @@ function Results(props: {
     } catch (error) {
       dispatch({
         type: "failure",
-        error: { message: (error as Error).toString() },
+        error: { error: error as Error },
       });
     }
   }, [props.commit, props.db, props.lastSubmit, props.prepareStatement]);
 
-  if (state.loading) return <div>Loading...</div>;
-  if (state.results) {
+  let body;
+  let footer;
+  console.log(state);
+  if (state.loading) body = <div>Loading...</div>;
+  else if (state.results) {
     const { columns, rows, elapsed } = state.results;
-    return (
-      <div>
-        Results
+    footer = (
+      <span>
+        Finished in{" "}
+        {prettyMilliseconds(elapsed, { millisecondsDecimalDigits: 2 })}
+      </span>
+    );
+    body = (
+      <div style="width: 100%;">
         <table className="swt-table">
           <thead>
             <tr>
@@ -192,14 +211,26 @@ function Results(props: {
             ))}
           </tbody>
         </table>
-        <div>
-          Finished in{" "}
-          {prettyMilliseconds(elapsed, { millisecondsDecimalDigits: 2 })}
-        </div>
       </div>
     );
-  }
-  return <div>{state.error!.message}</div>;
+  } else
+    body = (
+      <div>
+        <span style="font-family: monospace; padding: 4px 12px;">
+          {state.error!.error.message}
+        </span>
+      </div>
+    );
+
+  return (
+    <div>
+      {body}
+      <div style="border-top: 1px solid #cecece; display: flex; justify-content: space-between; font-size: 14px; padding: 2px 4px;font-style: italic;">
+        <div>{props.footer}</div>
+        <div style="text-align: right;">{footer}</div>
+      </div>
+    </div>
+  );
 }
 
 const initialCode = `select 1 + 1, 'hello!' as name;`;
@@ -231,8 +262,49 @@ export function App(props: {
           lastSubmit={lastSubmit}
           sqlite3={props.sqlite3}
           prepareStatement={props.prepareStatement}
+          footer=""
         />
       )}
     </>
+  );
+}
+export function Sample(props: {
+  sqlite3: Sqlite3Static;
+  initialCode?: string;
+  prepareStatement?: (statement: PreparedStatement) => void;
+  footerExtra?: string;
+}) {
+  const db = useMemo(() => new props.sqlite3.oo1.DB(":memory:"), []);
+  const sqliteVersion = useMemo(
+    () => props.sqlite3.capi.sqlite3_libversion(),
+    []
+  );
+  const [commit, setCommit] = useState<string | null>(
+    props.initialCode ?? initialCode
+  );
+  const [lastSubmit, setLastSubmit] = useState<number>(Date.now());
+
+  return (
+    <div style="border: 1px solid #777; border-radius: 4px;">
+      <Editor
+        initialCode={props.initialCode ?? initialCode}
+        onCommit={(s) => {
+          setLastSubmit(Date.now());
+          setCommit(s);
+        }}
+      />
+      {commit && (
+        <div>
+          <Results
+            commit={commit!}
+            db={db}
+            lastSubmit={lastSubmit}
+            sqlite3={props.sqlite3}
+            prepareStatement={props.prepareStatement}
+            footer={`SQLite ${sqliteVersion}${props.footerExtra ?? ""}`}
+          />
+        </div>
+      )}
+    </div>
   );
 }

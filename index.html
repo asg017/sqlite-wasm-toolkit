@@ -7,8 +7,37 @@
     <title>sqlite-wasm-toolkit Demo</title>
     <link rel="stylesheet" href="/src/styles.css"/>
   </head>
-  <body>
+  <body style="max-width: 48rem; margin: 0 auto;">
     <div id="app"></div>
+    <div>
+      md exmaples
+
+      <h3>sqlite_version()</h3>
+
+        <p>The sqlite_version() function returns the version string for the SQLite library that is running. This function is an SQL wrapper around the sqlite3_libversion() C-interface.
+        </p>
+      <pre><code class="language-sql">select sqlite_version();
+      </code></pre>
+
+      <h3>json_each()</h3>
+      <p>
+        The json_each(X) and json_tree(X) table-valued functions walk the JSON value provided as their first argument and return one row for each element. The json_each(X) function only walks the immediate children of the top-level array or object, or just the top-level element itself if the top-level element is a primitive value. The json_tree(X) function recursively walks through the JSON substructure starting with the top-level element.
+
+
+      </p>
+      <pre><code class="language-sql">select *
+from json_each('[
+ 1,2,3,
+ ["a", "b", "c"]
+]');
+</code></pre>
+<pre><code class="language-sql">select parse;
+</code></pre>
+
+</code></pre>
+<pre><code class="language-sql">select * from pragma_function_list order by name;
+</code></pre>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -17,9 +17,9 @@
 .swt-table {
   border-collapse: collapse;
   max-height: 600px;
-  display: block;
   font-family: MonaspaceXenon-Regular;
   font-size: 0.8rem;
+  margin: 0 auto;
 }
 
 .swt-table td,
@@ -28,8 +28,11 @@ th {
 }
 
 .swt-table th {
-  background: #dedede;
+  background: #ededed;
   margin: 4px;
+  text-align: center;
+  font-size: 14px;
+  padding: 4px 8px;
 }
 
 .swt-table td {
@@ -89,8 +92,18 @@ th {
   font-size: 0.8rem !important;
   font-family: MonaspaceNeon-Regular !important;
 }
+
 .swt-table thead th {
   top: 0;
+}
+
+.swt-table {
+}
+.swt-table thead th {
+  position: sticky;
+  top: 0;
+}
+.swt-table tbody {
 }
 
 .swt-table .swt-cell-string {
@@ -102,6 +115,15 @@ th {
   text-align: right;
 }
 
+.swt-editor {
+  width: 100%;
+  & .swt-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 4px;
+    font-size: 12px;
+  }
+}
 .swt-editor .cm-editor .cm-content {
   font-family: "MonaspaceNeon-Regular";
   font-size: 0.9rem;
@@ -109,6 +131,14 @@ th {
 .swt-editor .cm-editor {
   border: 1px solid black;
   background: var(--swt-code-bg);
+}
+
+button.submit {
+  background-color: var(--swt-code-keyword);
+  border: none;
+  color: white;
+  border-radius: 4px;
+  padding: 2px 6px;
 }
 
 @font-face {

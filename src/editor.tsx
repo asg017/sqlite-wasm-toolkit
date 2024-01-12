@@ -118,15 +118,20 @@ export function Editor(props: {
 
   return (
     <div className="swt-editor">
-      <div ref={editorRef} />
-      <button
-        onClick={() => {
-          if (viewRef.current)
-            props.onCommit(viewRef.current.state.doc.toString());
-        }}
-      >
-        Submit
-      </button>
+      <div style="position: relative;">
+        <div ref={editorRef} />
+        <div style="position: absolute; right: 4px; transform: translateY(-100%)">
+          <button
+            className="submit"
+            onClick={() => {
+              if (viewRef.current)
+                props.onCommit(viewRef.current.state.doc.toString());
+            }}
+          >
+            Submit
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

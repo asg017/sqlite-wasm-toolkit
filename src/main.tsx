@@ -2,7 +2,7 @@ import { render } from "preact";
 import { App } from "./app.tsx";
 import { PreparedStatement, Sqlite3Static } from "src/sqlite3.mjs";
 import { default as sqlite3InitModule } from "./sqlite3.mjs";
-
+import { eachCode } from "./slim.tsx";
 function prepareStatement(stmt: PreparedStatement) {
   if (stmt.getParamIndex(":name") !== undefined) {
     stmt.bind({ ":name": "alex" });
@@ -14,5 +14,6 @@ async function main() {
     <App sqlite3={sqlite3} prepareStatement={prepareStatement} />,
     document.getElementById("app")!
   );
+  eachCode({ sqlite3, footerExtra: "" });
 }
 main();

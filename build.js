@@ -2,10 +2,10 @@ import * as esbuild from "esbuild";
 import { copyFileSync } from "node:fs";
 esbuild.buildSync({
   entryPoints: ["src/full.tsx", "src/slim.tsx"],
+  outdir: "dist",
   bundle: true,
   minify: true,
   format: "esm",
-  outdir: "dist",
   loader: {
     ".woff": "dataurl",
     ".otf": "dataurl",
