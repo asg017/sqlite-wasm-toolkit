@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
@@ -9,6 +9,15 @@
   </head>
   <body style="max-width: 48rem; margin: 0 auto;">
     <div id="app"></div>
+    <button id="change">Change</button>
+    <script>
+      change.addEventListener('click', () => {
+        const html = document.querySelector('html');
+      if(html.classList.contains('dark')) html.classList.remove('dark')
+      else html.classList.add('dark')
+      })
+
+    </script>
     <div>
       md exmaples
 
@@ -39,5 +48,11 @@ from json_each('[
 </code></pre>
     </div>
     <script type="module" src="/src/demo.tsx"></script>
+    <style>
+      html.dark body {
+        background: #1b1b1f;
+        color: rgba(255, 255, 245, 0.86);
+      }
+    </style>
   </body>
 </html>

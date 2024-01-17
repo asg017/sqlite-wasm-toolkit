@@ -181,7 +181,8 @@ export function Results(props: {
     const { columns, rows, elapsed } = state.results;
     footer = (
       <span>
-        Finished in{" "}
+        {rows.length}
+        {" row" + (rows.length > 1 ? "s" : "")} in{" "}
         {prettyMilliseconds(elapsed, { millisecondsDecimalDigits: 2 })}
       </span>
     );

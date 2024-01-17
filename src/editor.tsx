@@ -10,6 +10,8 @@ import {
   Completion,
   autocompletion,
 } from "@codemirror/autocomplete";
+import { oneDarkTheme } from "@codemirror/theme-one-dark";
+import { Compartment } from "@codemirror/state";
 
 // the SQLite dialect provided by Codemirror is a bit rough on the edges, so here's an improved version
 const SQLite = SQLDialect.define({
@@ -109,7 +111,8 @@ export function Editor(props: {
       extraCompletions = SQLite.language.data.of({
         autocomplete: autocompleteFor(props.extraCompletions),
       });
-
+    const lightTheme = EditorView.baseTheme({});
+    const themeConfig = new Compartment();
     const extensions = [
       keymap.of([
         {
@@ -125,12 +128,18 @@ export function Editor(props: {
       sql({ dialect: SQLite }),
       syntaxHighlighting(myHighlightStyle),
     ];
+
     if (extraCompletions)
       extensions.push(
         extraCompletions,
         autocompletion({ selectOnOpen: false })
       );
 
+    if (document.documentElement.classList.contains("dark")) {
+      extensions.push(themeConfig.of(oneDarkTheme));
+    } else {
+      extensions.push(themeConfig.of(lightTheme));
+    }
     const view = new EditorView({
       parent: editorRef.current,
       doc: props.initialCode,
@@ -138,7 +147,29 @@ export function Editor(props: {
     });
     viewRef.current = view;
 
+    // observe the `<html>` element for classList "dark" changes
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (
+          mutation.type === "attributes" &&
+          mutation.attributeName === "class"
+        ) {
+          if ((mutation.target as HTMLElement).classList.contains("dark")) {
+            view.dispatch({
+              effects: themeConfig.reconfigure(oneDarkTheme),
+            });
+          } else {
+            view.dispatch({
+              effects: themeConfig.reconfigure(lightTheme),
+            });
+          }
+        }
+      }
+    });
+    observer.observe(document.documentElement, { attributes: true });
+
     return () => {
+      observer.disconnect();
       view.destroy();
       viewRef.current = undefined;
     };

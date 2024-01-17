@@ -9,11 +9,29 @@
   --swt-code-literal: #b55908;
   --swt-code-params: #d93025;
 
+  --swt-result-th-bg: #ededed;
+  --swt-result-td-bg: white;
+
   /* Observable Inspector stuff */
   --syntax_key: var(--swt-code-keyword);
   --syntax_string: var(--swt-code-string);
   --syntax_number: var(--swt-code-literal);
 }
+
+html.dark {
+  --swt-code-bg: #282c34;
+  --swt-code-comment: #80868b;
+  --swt-code-variables: #f28b82;
+  --swt-code-literal: #fa903e;
+  --swt-code-class: #fdd663;
+  --swt-code-string: #81c995;
+  --swt-code-quotes-and-meta: #8ab4f8;
+  --swt-code-keyword: #c58af9;
+
+  --swt-result-th-bg: #212121;
+  --swt-result-td-bg: #313131;
+}
+
 .swt-table {
   border-collapse: collapse;
   max-height: 600px;
@@ -28,7 +46,7 @@ th {
 }
 
 .swt-table th {
-  background: #ededed;
+  background: var(--swt-result-th-bg);
   margin: 4px;
   text-align: center;
   font-size: 14px;
@@ -36,7 +54,7 @@ th {
 }
 
 .swt-table td {
-  background: white;
+  background: var(--swt-result-td-bg);
   position: relative;
   max-width: 8rem;
   overflow: hidden;
@@ -99,6 +117,7 @@ th {
 }
 
 .swt-table {
+  width: 100%;
 }
 .swt-table thead th {
   position: sticky;
@@ -140,6 +159,9 @@ button.submit {
   color: white;
   border-radius: 4px;
   padding: 2px 6px;
+}
+html.dark button.submit {
+  color: #1b1b1b;
 }
 
 @font-face {
