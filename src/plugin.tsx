@@ -15,8 +15,11 @@ export function eachCode(params: {
   sqlite3: Sqlite3Static;
   footerExtra: string;
   extraCompletions?: any[];
+  targets?: string;
 }) {
-  for (const code of document.body.querySelectorAll("code.language-sql")) {
+  for (const code of document.body.querySelectorAll(
+    params.targets ?? "code.language-sql"
+  )) {
     const sql = (code.textContent as string).trim();
     const replacement = document.createElement("div");
     (code.parentElement as HTMLElement).replaceWith(replacement);

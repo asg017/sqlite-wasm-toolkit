@@ -18,8 +18,8 @@
     ".": {
       "import": "./dist/full.js"
     },
-    "./slim": {
-      "import": "./dist/slim.js"
+    "./plugin": {
+      "import": "./dist/plugin.js"
     }
   },
   "scripts": {

@@ -2,7 +2,7 @@ import { render } from "preact";
 import { SqlWidget } from "./widgets.tsx";
 import { PreparedStatement, Sqlite3Static } from "src/sqlite3.mjs";
 import { default as sqlite3InitModule } from "./sqlite3.mjs";
-import { eachCode } from "./slim.tsx";
+import { eachCode } from "./plugin.tsx";
 function prepareStatement(stmt: PreparedStatement) {
   if (stmt.getParamIndex(":name") !== undefined) {
     stmt.bind({ ":name": "alex" });
