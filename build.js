@@ -2,7 +2,7 @@ import * as esbuild from "esbuild";
 import { copyFileSync } from "node:fs";
 
 async function main() {
-  const ctx = await esbuild.context({
+  esbuild.buildSync({
     entryPoints: ["src/full.tsx", "src/plugin.tsx"],
     outdir: "dist",
     bundle: true,
@@ -13,8 +13,6 @@ async function main() {
       ".otf": "dataurl",
     },
   });
-
-  await ctx.watch();
   copyFileSync("src/sqlite3.wasm", "dist/sqlite3.wasm");
 }
 
