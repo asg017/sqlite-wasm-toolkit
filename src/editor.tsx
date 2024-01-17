@@ -4,6 +4,12 @@ import { sql, SQLDialect } from "@codemirror/lang-sql";
 import { keymap } from "@codemirror/view";
 import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
 import { tags } from "@lezer/highlight";
+import {
+  CompletionContext,
+  CompletionResult,
+  Completion,
+  autocompletion,
+} from "@codemirror/autocomplete";
 
 // the SQLite dialect provided by Codemirror is a bit rough on the edges, so here's an improved version
 const SQLite = SQLDialect.define({
@@ -14,11 +20,23 @@ const SQLite = SQLDialect.define({
   // https://www.sqlite.org/datatype3.html
   types:
     "null integer real text blob json jsonb boolean bool date datetime float",
-  builtin: "xyz",
   operatorChars: "*+-%<>!=&|/~",
   identifierQuotes: '`"',
   specialVar: "@:?$",
 });
+
+function autocompleteFor(
+  completions: Completion[]
+): (context: CompletionContext) => CompletionResult | null {
+  return function (context) {
+    let word = context.matchBefore(/\w*/);
+    if (!word || (word.from == word.to && !context.explicit)) return null;
+    return {
+      from: word.from,
+      options: completions,
+    };
+  };
+}
 
 const myHighlightStyle = HighlightStyle.define([
   { tag: tags.meta, color: "#404740" },
@@ -74,39 +92,49 @@ const myHighlightStyle = HighlightStyle.define([
   },
   { tag: tags.invalid, color: "#f00" },
 ]);
+
 export function Editor(props: {
   initialCode: string;
   onCommit: (value: string) => void;
+  extraCompletions?: Completion[];
 }) {
   const editorRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | undefined>(undefined);
 
   useEffect(() => {
     if (!editorRef.current) return;
+    let extraCompletions;
+
+    if (props.extraCompletions)
+      extraCompletions = SQLite.language.data.of({
+        autocomplete: autocompleteFor(props.extraCompletions),
+      });
+
+    const extensions = [
+      keymap.of([
+        {
+          key: "Shift-Enter",
+          run: function () {
+            props.onCommit(view.state.doc.toString());
+            return true;
+          },
+        },
+      ]),
+      basicSetup,
+      EditorView.lineWrapping,
+      sql({ dialect: SQLite }),
+      syntaxHighlighting(myHighlightStyle),
+    ];
+    if (extraCompletions)
+      extensions.push(
+        extraCompletions,
+        autocompletion({ selectOnOpen: false })
+      );
+
     const view = new EditorView({
       parent: editorRef.current,
       doc: props.initialCode,
-      extensions: [
-        keymap.of([
-          {
-            key: "Shift-Enter",
-            run: function () {
-              props.onCommit(view.state.doc.toString());
-              return true;
-            },
-          },
-        ]),
-        basicSetup,
-        EditorView.lineWrapping,
-        sql({ dialect: SQLite }),
-        EditorView.updateListener.of((v) => {
-          if (v.docChanged) {
-            //props.onUpdate(v.state.doc.toString());
-          }
-        }),
-        syntaxHighlighting(myHighlightStyle),
-        //syntaxHighlighting(defaultHighlightStyle),
-      ],
+      extensions,
     });
     viewRef.current = view;
 

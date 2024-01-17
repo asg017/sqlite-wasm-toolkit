@@ -1,5 +1,5 @@
 import { render } from "preact";
-import { App, Sample } from "./app.tsx";
+import { SqlWidget } from "./widgets.tsx";
 import { PreparedStatement, Sqlite3Static } from "src/sqlite3.mjs";
 
 export async function attach(params: {
@@ -8,23 +8,24 @@ export async function attach(params: {
   initialCode?: string;
   prepareStatement?: (statement: PreparedStatement) => void;
 }) {
-  return render(<App {...params} />, params.target);
+  return render(<SqlWidget {...params} />, params.target);
 }
 
 export function eachCode(params: {
   sqlite3: Sqlite3Static;
   footerExtra: string;
+  extraCompletions?: any[];
 }) {
   for (const code of document.body.querySelectorAll("code.language-sql")) {
-    console.log(code);
-    const sql = code.textContent.trim();
+    const sql = (code.textContent as string).trim();
     const replacement = document.createElement("div");
-    code.parentElement.replaceWith(replacement);
+    (code.parentElement as HTMLElement).replaceWith(replacement);
     render(
-      <Sample
+      <SqlWidget
         sqlite3={params.sqlite3}
         initialCode={sql}
         footerExtra={params.footerExtra}
+        extraCompletions={params.extraCompletions}
       />,
       replacement
     );

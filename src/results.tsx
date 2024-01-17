@@ -4,10 +4,9 @@ import {
   Sqlite3Static,
   SqlValue,
 } from "src/sqlite3.mjs";
-import { Editor } from "./editor";
+
 import { useEffect, useMemo, useReducer, useRef, useState } from "preact/hooks";
 import prettyMilliseconds from "pretty-ms";
-import "./styles.css";
 
 interface ExecutionResult {
   rows: [SqlValue, number][][];
@@ -134,7 +133,7 @@ function InspectJson(props: { data: string }) {
   return <div ref={ref}></div>;
 }
 
-function Results(props: {
+export function Results(props: {
   commit: string;
   db: Database;
   lastSubmit: number;
@@ -177,7 +176,6 @@ function Results(props: {
 
   let body;
   let footer;
-  console.log(state);
   if (state.loading) body = <div>Loading...</div>;
   else if (state.results) {
     const { columns, rows, elapsed } = state.results;
@@ -229,82 +227,6 @@ function Results(props: {
         <div>{props.footer}</div>
         <div style="text-align: right;">{footer}</div>
       </div>
-    </div>
-  );
-}
-
-const initialCode = `select 1 + 1, 'hello!' as name;`;
-
-export function App(props: {
-  sqlite3: Sqlite3Static;
-  initialCode?: string;
-  prepareStatement?: (statement: PreparedStatement) => void;
-}) {
-  const db = useMemo(() => new props.sqlite3.oo1.DB(":memory:"), []);
-  const [commit, setCommit] = useState<string | null>(
-    props.initialCode ?? initialCode
-  );
-  const [lastSubmit, setLastSubmit] = useState<number>(Date.now());
-
-  return (
-    <>
-      <Editor
-        initialCode={props.initialCode ?? initialCode}
-        onCommit={(s) => {
-          setLastSubmit(Date.now());
-          setCommit(s);
-        }}
-      />
-      {commit && (
-        <Results
-          commit={commit!}
-          db={db}
-          lastSubmit={lastSubmit}
-          sqlite3={props.sqlite3}
-          prepareStatement={props.prepareStatement}
-          footer=""
-        />
-      )}
-    </>
-  );
-}
-export function Sample(props: {
-  sqlite3: Sqlite3Static;
-  initialCode?: string;
-  prepareStatement?: (statement: PreparedStatement) => void;
-  footerExtra?: string;
-}) {
-  const db = useMemo(() => new props.sqlite3.oo1.DB(":memory:"), []);
-  const sqliteVersion = useMemo(
-    () => props.sqlite3.capi.sqlite3_libversion(),
-    []
-  );
-  const [commit, setCommit] = useState<string | null>(
-    props.initialCode ?? initialCode
-  );
-  const [lastSubmit, setLastSubmit] = useState<number>(Date.now());
-
-  return (
-    <div style="border: 1px solid #777; border-radius: 4px;">
-      <Editor
-        initialCode={props.initialCode ?? initialCode}
-        onCommit={(s) => {
-          setLastSubmit(Date.now());
-          setCommit(s);
-        }}
-      />
-      {commit && (
-        <div>
-          <Results
-            commit={commit!}
-            db={db}
-            lastSubmit={lastSubmit}
-            sqlite3={props.sqlite3}
-            prepareStatement={props.prepareStatement}
-            footer={`SQLite ${sqliteVersion}${props.footerExtra ?? ""}`}
-          />
-        </div>
-      )}
     </div>
   );
 }

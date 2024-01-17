@@ -1,4 +1,4 @@
-@import "./inspector.css";
+@impor "./inspector.css";
 :root {
   --swt-code-bg: #f8fafd;
   --swt-code-comment: #52555b; /*#5f6368;*/
@@ -39,6 +39,7 @@ th {
   background: white;
   position: relative;
   max-width: 8rem;
+  overflow: hidden;
 
   & .swt-cell-inner {
     display: block;
@@ -107,7 +108,7 @@ th {
 }
 
 .swt-table .swt-cell-string {
-  white-space: pre-wrap;
+  white-space: nowrap;
 }
 .swt-table .swt-cell-blob,
 .swt-cell-number {
