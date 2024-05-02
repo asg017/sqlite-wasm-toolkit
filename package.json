@@ -30,6 +30,7 @@
   },
   "devDependencies": {
     "@codemirror/lang-sql": "^6.5.4",
+    "@codemirror/theme-one-dark": "^6.1.2",
     "@codemirror/view": "^6.22.0",
     "@laynezh/vite-plugin-lib-assets": "^0.5.14",
     "@observablehq/inspector": "^5.0.0",
@@ -39,7 +40,9 @@
     "preact": "^10.19.1",
     "pretty-ms": "^8.0.0",
     "typescript": "^5.2.2",
-    "@codemirror/theme-one-dark": "^6.1.2",
     "vite": "^5.0.0"
+  },
+  "dependencies": {
+    "@shoelace-style/shoelace": "^2.12.0"
   }
 }

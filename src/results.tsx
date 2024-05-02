@@ -5,7 +5,13 @@ import {
   SqlValue,
 } from "src/sqlite3.mjs";
 
-import { useEffect, useMemo, useReducer, useRef, useState } from "preact/hooks";
+import {
+  useContext,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+} from "preact/hooks";
 import prettyMilliseconds from "pretty-ms";
 
 interface ExecutionResult {
@@ -50,13 +56,6 @@ function reducer(state: State, action: Action): State {
 
 function TableCell(props: { value: SqlValue; subtype: number }) {
   const { value, subtype } = props;
-  const [showClipboard, setShowClipboard] = useState<boolean>(false);
-  function onmousenter() {
-    setShowClipboard(true);
-  }
-  function onmouseleave() {
-    setShowClipboard(false);
-  }
   let inner;
   if (value === null) {
     inner = <span className="swt-cell-null">NULL</span>;
@@ -81,45 +80,21 @@ function TableCell(props: { value: SqlValue; subtype: number }) {
   else if (typeof value === "bigint")
     inner = <span className="swt-cell-number">{props.value}</span>;
   else inner = <span className="swt-cell-unknown">Unknown</span>;
-  return (
-    <td onMouseEnter={onmousenter} onMouseLeave={onmouseleave}>
-      <div className={"swt-cell-inner" + (showClipboard ? " active" : "")}>
-        {inner}
-      </div>
-      {showClipboard && <CopyButton value={value} />}
-    </td>
-  );
-}
-
-function CopyButton(props: { value: SqlValue }) {
-  const { value } = props;
-  const [showMessage, setShowMessage] = useState<boolean>(false);
-  return (
-    <div className="swt-cell-copy cpy-msg">
-      {showMessage ? (
-        <div style="position: absolute; bottom: -.2rem; left: 50%; transform: translateX(-50%); font-size: .7rem;">
-          Copied!
-        </div>
-      ) : null}
-      <button
-        onClick={() => {
-          if (value === null) navigator.clipboard.writeText("");
-          else navigator.clipboard.writeText(value.toString());
-          setShowMessage(true);
-          setTimeout(() => setShowMessage(false), 500);
-        }}
-      >
-        📋
-      </button>
-    </div>
-  );
+  return <td>{inner}</td>;
 }
 
 // @ts-ignore
 import { Inspector } from "@observablehq/inspector";
+import { SQLiteContext } from "./context";
 
 function InspectJson(props: { data: string }) {
-  const parsed = useMemo(() => JSON.parse(props.data), [props.data]);
+  const parsed = useMemo(() => {
+    try {
+      return JSON.parse(props.data);
+    } catch {
+      return props.data;
+    }
+  }, [props.data]);
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!ref.current) return;
@@ -137,10 +112,10 @@ export function Results(props: {
   commit: string;
   db: Database;
   lastSubmit: number;
-  sqlite3: Sqlite3Static;
   prepareStatement?: (statement: PreparedStatement) => void;
   footer: string;
 }) {
+  const sqlite3 = useContext(SQLiteContext)!;
   const [state, dispatch] = useReducer<State, Action>(reducer, {
     loading: true,
   });
@@ -158,8 +133,8 @@ export function Results(props: {
       while (stmt.step()) {
         rows.push(
           columns.map((_, i) => {
-            const value = props.sqlite3.capi.sqlite3_column_value(stmt, i);
-            const subtype = props.sqlite3.capi.sqlite3_value_subtype(value);
+            const value = sqlite3.capi.sqlite3_column_value(stmt, i);
+            const subtype = sqlite3.capi.sqlite3_value_subtype(value);
             return [stmt.get(i), subtype];
           })
         );
@@ -182,21 +157,18 @@ export function Results(props: {
     footer = (
       <span>
         {rows.length}
-        {" row" + (rows.length > 1 ? "s" : "")} in{" "}
+        {" row" + (rows.length > 1 ? "s" : "")}, {columns.length}
+        {" column" + (columns.length > 1 ? "s" : "")} in{" "}
         {prettyMilliseconds(elapsed, { millisecondsDecimalDigits: 2 })}
       </span>
     );
     body = (
-      <div style="width: 100%;">
-        <table className="swt-table">
+      <div className="swt-table">
+        <table>
           <thead>
             <tr>
               {columns.map((column) => (
-                <th>
-                  <div style="resize: horizontal;  overflow: auto;">
-                    {column}
-                  </div>
-                </th>
+                <th>{column}</th>
               ))}
             </tr>
           </thead>
@@ -214,20 +186,57 @@ export function Results(props: {
     );
   } else
     body = (
-      <div>
-        <span style="font-family: monospace; padding: 4px 12px;">
-          {state.error!.error.message}
-        </span>
+      <div className="swt-error">
+        <span>{state.error!.error.message}</span>
       </div>
     );
 
   return (
     <div>
       {body}
-      <div style="border-top: 1px solid #cecece; display: flex; justify-content: space-between; font-size: 14px; padding: 2px 4px;font-style: italic;">
-        <div>{props.footer}</div>
-        <div style="text-align: right;">{footer}</div>
+      <div className="swt-results-footer">
+        <div>{footer}</div>
+        <div style="display: flex; align-items: center; justify-contents: space-around; grid-gap: 10px;">
+          <div>{props.footer}</div>
+        </div>
       </div>
     </div>
+  );
+}
+
+function Copy() {
+  return (
+    <button style="background: none; padding: 1px 4px; margin: 0; border: 1px solid #c3c3c4; border-radius: 4px; cursor: pointer;">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="10"
+        height="10"
+        fill="currentColor"
+        class="bi bi-copy"
+        viewBox="0 0 16 16"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"
+        />
+      </svg>
+    </button>
+  );
+}
+function Info() {
+  return (
+    <button style="background: none; padding: 1px 4px; margin: 0; border: 1px solid #c3c3c4; border-radius: 4px; cursor: pointer;">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="10"
+        height="10"
+        fill="currentColor"
+        class="bi bi-info-circle"
+        viewBox="0 0 16 16"
+      >
+        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+        <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0" />
+      </svg>
+    </button>
   );
 }

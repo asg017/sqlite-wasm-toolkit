@@ -1,30 +1,45 @@
-import { useMemo, useState } from "preact/hooks";
-import { PreparedStatement, Sqlite3Static } from "src/sqlite3.mjs";
+import { useContext, useEffect, useMemo, useState } from "preact/hooks";
+import { PreparedStatement, Sqlite3Static, Database } from "src/sqlite3.mjs";
 import { Editor } from "./editor";
 import { Results } from "./results";
 import "./styles.css";
 import { Completion } from "@codemirror/autocomplete";
-const initialCode = `select 1 + 1, 'hello!' as name;`;
+import { SQLiteContext } from "./context";
+
+const initialCode = `select 1 + 1, 'hello!' as name, random();`;
 
 export function SqlWidget(props: {
-  sqlite3: Sqlite3Static;
+  db?: Database;
   initialCode?: string;
   prepareStatement?: (statement: PreparedStatement) => void;
   footerExtra?: string;
   extraCompletions?: Completion[];
+  refresh?: EventTarget;
 }) {
-  const db = useMemo(() => new props.sqlite3.oo1.DB(":memory:"), []);
-  const sqliteVersion = useMemo(
-    () => props.sqlite3.capi.sqlite3_libversion(),
-    []
+  const sqlite3 = useContext(SQLiteContext)!;
+  if (!sqlite3) return <></>;
+
+  const db = useMemo(
+    () => props.db ?? new sqlite3.oo1.DB(":memory:"),
+    [props.db]
   );
+  const sqliteVersion = useMemo(() => sqlite3.capi.sqlite3_libversion(), []);
   const [commit, setCommit] = useState<string | null>(
     props.initialCode ?? initialCode
   );
   const [lastSubmit, setLastSubmit] = useState<number>(Date.now());
 
+  useEffect(() => {
+    if (props.refresh) {
+      function onRefresh() {
+        setLastSubmit(Date.now());
+      }
+      props.refresh.addEventListener("refresh", onRefresh);
+      return () => props.refresh?.removeEventListener("refresh", onRefresh);
+    }
+  }, [props.refresh, setLastSubmit]);
   return (
-    <div style="border: 1px solid #777; border-radius: 4px;">
+    <div className="swt-sql-widget">
       <Editor
         initialCode={props.initialCode ?? initialCode}
         onCommit={(s) => {
@@ -32,6 +47,7 @@ export function SqlWidget(props: {
           setCommit(s);
         }}
         extraCompletions={props.extraCompletions}
+        commit={commit}
       />
       {commit && (
         <div>
@@ -39,9 +55,8 @@ export function SqlWidget(props: {
             commit={commit!}
             db={db}
             lastSubmit={lastSubmit}
-            sqlite3={props.sqlite3}
             prepareStatement={props.prepareStatement}
-            footer={`SQLite ${sqliteVersion}${props.footerExtra ?? ""}`}
+            footer={`SQLite WASM ${sqliteVersion}${props.footerExtra ?? ""}`}
           />
         </div>
       )}

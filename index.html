@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
@@ -8,6 +8,12 @@
     <link rel="stylesheet" href="/src/styles.css"/>
   </head>
   <body style="max-width: 48rem; margin: 0 auto;">
+
+    <h2>Notebook</h2>
+    <div id="nb"></div>
+
+    <hr/>
+
     <div id="app"></div>
     <button id="change">Change</button>
     <script>
@@ -34,7 +40,7 @@
 
 
       </p>
-      <pre><code class="language-sql">select *
+      <pre><code class="language-sql">select *, 'asdfjasdfhasodfjaoisdfjasdofiajsdf' as X
 from json_each('[
  1,2,3,
  ["a", "b", "c"]
@@ -46,6 +52,7 @@ from json_each('[
 </code></pre>
 <pre><code class="language-sql">select * from pragma_function_list order by name limit 10;
 </code></pre>
+
     </div>
     <script type="module" src="/src/demo.tsx"></script>
     <style>

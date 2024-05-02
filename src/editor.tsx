@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 import { basicSetup, EditorView } from "codemirror";
 import { sql, SQLDialect } from "@codemirror/lang-sql";
 import { keymap } from "@codemirror/view";
@@ -17,8 +17,7 @@ import { Compartment } from "@codemirror/state";
 const SQLite = SQLDialect.define({
   // Based on https://www.sqlite.org/lang_keywords.html based on likely keywords to be used in select queries
   // https://github.com/simonw/datasette/pull/1893#issuecomment-1316401895:
-  keywords: `and as asc between by case cast count create current_date current_time current_timestamp desc distinct each else escape except exists explain filter first for from full generated group having if in index inner intersect into isnull join last left like limit not null or order outer over pragma primary query raise range regexp right rollback row select set table then to union unique using values view virtual when with where
-    foreign key references temporary`,
+  keywords: `and as asc between by case cast count create current_date current_time current_timestamp desc distinct each else escape except exists explain filter first for from full generated group having if in index inner intersect into isnull join last left like limit not null or order outer over pragma primary query raise range regexp right rollback row select set table then to union unique using values view virtual when with where foreign key references temporary`,
   // https://www.sqlite.org/datatype3.html
   types:
     "null integer real text blob json jsonb boolean bool date datetime float",
@@ -99,10 +98,18 @@ export function Editor(props: {
   initialCode: string;
   onCommit: (value: string) => void;
   extraCompletions?: Completion[];
+  commit: string | null;
 }) {
   const editorRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | undefined>(undefined);
+  const [source, setSource] = useState<string>(props.initialCode);
+  const [dirty, setDirty] = useState(false);
 
+  useEffect(() => {
+    setDirty(props.commit !== source);
+  }, [props.commit, source]);
+
+  // On editor element mount
   useEffect(() => {
     if (!editorRef.current) return;
     let extraCompletions;
@@ -125,6 +132,11 @@ export function Editor(props: {
       ]),
       basicSetup,
       EditorView.lineWrapping,
+      EditorView.updateListener.of((viewUpdate) => {
+        if (viewUpdate.docChanged) {
+          setSource(viewUpdate.state.doc.toString());
+        }
+      }),
       sql({ dialect: SQLite }),
       syntaxHighlighting(myHighlightStyle),
     ];
@@ -140,6 +152,7 @@ export function Editor(props: {
     } else {
       extensions.push(themeConfig.of(lightTheme));
     }
+
     const view = new EditorView({
       parent: editorRef.current,
       doc: props.initialCode,
@@ -166,6 +179,7 @@ export function Editor(props: {
         }
       }
     });
+
     observer.observe(document.documentElement, { attributes: true });
 
     return () => {
@@ -179,7 +193,7 @@ export function Editor(props: {
     <div className="swt-editor">
       <div style="position: relative;">
         <div ref={editorRef} />
-        <div style="position: absolute; right: 4px; transform: translateY(-100%)">
+        <div style="position: absolute; top: 3px; right: 3px;">
           <button
             className="submit"
             onClick={() => {
@@ -187,7 +201,29 @@ export function Editor(props: {
                 props.onCommit(viewRef.current.state.doc.toString());
             }}
           >
-            Submit
+            {dirty /*"▶" : "▷"*/ ? (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="22"
+                height="22"
+                fill="currentColor"
+                class="bi bi-play-fill"
+                viewBox="0 0 16 16"
+              >
+                <path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393" />
+              </svg>
+            ) : (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="22"
+                height="22"
+                fill="currentColor"
+                class="bi bi-play"
+                viewBox="0 0 16 16"
+              >
+                <path d="M10.804 8 5 4.633v6.734zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696z" />
+              </svg>
+            )}
           </button>
         </div>
       </div>
